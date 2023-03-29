@@ -4,6 +4,7 @@ import (
 	"amogus/pvm"
 	"fmt"
 	"os"
+	"runtime"
 )
 
 func TestPvm() {
@@ -25,13 +26,12 @@ func TestPvm() {
 
 		fmt.Printf("[%x] tworze dzieci\n", myId)
 
-		spawnResult, err := pvm.Spawn("p_pvm", []string{""}, pvm.TaskDefault, "", 3)
-		exitIfError(err)
-
-		if spawnResult.Numt <= 0 {
+		spawnResult, err := pvm.Spawn("amogus", []string{"test"}, pvm.TaskDefault, "", 3)
+		if err != nil {
 			fmt.Printf("[%x] nie moge stworzyc dzieci\n", myId)
 			err := pvm.Perror("pvm_spawn")
 			exitIfError(err)
+			os.Exit(1)
 		}
 
 		fmt.Printf("[%x] stworzylem pomyslnie %d procesy\n", myId, spawnResult.Numt)
@@ -90,6 +90,10 @@ func TestPvm() {
 
 func exitIfError(err error) {
 	if err != nil {
+		_, _, no, ok := runtime.Caller(1)
+		if ok {
+			fmt.Printf("error from test.go#%d\n", no)
+		}
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}

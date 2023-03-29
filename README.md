@@ -25,3 +25,9 @@
 ⠙⢿⣷⣤⣤⣿⣷⣤⣀⡀⠀⠀⣀⣀⣠⣴⡶⠟⠛⠉⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠉⠉⠉⠉⠙⠛⠻⠿⠛⠛⠋⠉⠀⠀⠀⠀⠀⠀⠀
 ```
+
+### container build tools
+`docker build --target ubuntu-with-sshd -t ubuntu-with-sshd ./pvmubuntu`
+`docker run -p 2222:22 ubuntu-with-sshd`
+`ssh -v localhost -p 2222`
+to check container ip use `docker ps` and `docker inspect`
