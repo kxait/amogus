@@ -166,6 +166,16 @@ func Recv(tid int, msgtag int) (int, error) {
 	return int(info), nil
 }
 
+func Nrecv(tid int, msgtag int) (int, error) {
+	info := C.pvm_nrecv(C.int(tid), C.int(msgtag))
+
+	if info < 0 {
+		return 0, PvmErrorFromCInt(info)
+	}
+
+	return int(info), nil
+}
+
 type BufinfoResult struct {
 	Bytes  int
 	MsgTag int

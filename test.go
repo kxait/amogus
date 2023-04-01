@@ -26,7 +26,7 @@ func TestPvm() {
 
 		fmt.Printf("[%x] tworze dzieci\n", myId)
 
-		spawnResult, err := pvm.Spawn("amogus", []string{"test"}, pvm.TaskDefault, "", 3)
+		spawnResult, err := pvm.Spawn("amogus", []string{"--test"}, pvm.TaskDefault, "", 3)
 		if err != nil {
 			fmt.Printf("[%x] nie moge stworzyc dzieci\n", myId)
 			err := pvm.Perror("pvm_spawn")
