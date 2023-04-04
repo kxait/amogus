@@ -3,6 +3,9 @@ package main
 import (
 	"amogus/parent"
 	"fmt"
+	"log"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 )
 
@@ -49,6 +52,10 @@ func main() {
 	}
 
 	fmt.Printf("input: %s, config: %s, output: %s\n", hashesPath, configPath, outputPath)
+
+	go func() {
+		log.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
 
 	err := parent.RunParent(hashesPath, configPath, outputPath)
 

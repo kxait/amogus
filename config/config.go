@@ -24,6 +24,7 @@ type AmogusConfig struct {
 	Characters  string `yaml:"characters"`
 	Mode        Mode   `yaml:"mode"`
 	Slaves      int64  `yaml:"slaves"`
+	ChunkSize   int    `yaml:"chunk_size"`
 }
 
 func (conf *AmogusConfig) Base() int {

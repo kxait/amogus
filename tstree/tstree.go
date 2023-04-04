@@ -53,6 +53,7 @@ func BuildLookupTableFromFile(filename string) (*LookupTable, error) {
 	result := make(LookupTable)
 
 	file, err := os.Open(filename)
+	defer file.Close()
 
 	if err != nil {
 		return nil, err

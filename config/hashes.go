@@ -1,6 +1,7 @@
 package config
 
 import (
+	"amogus/tstree"
 	"bufio"
 	"fmt"
 	"os"
@@ -8,7 +9,8 @@ import (
 )
 
 type Hashes struct {
-	InputRawLines []string
+	//InputRawLines []string
+	Lut *tstree.LookupTable
 }
 
 func ReadHashesFile(filename string, mode Mode) (*Hashes, error) {
@@ -25,18 +27,18 @@ func ReadHashesFile(filename string, mode Mode) (*Hashes, error) {
 	}
 
 	result := &Hashes{
-		InputRawLines: lines,
+		Lut: tstree.BuildLookupTableFromLines(lines),
 	}
 
-	if compatible, incompatibleLine := isHashesFileCompatible(result, mode); !compatible {
+	if compatible, incompatibleLine := isHashesFileCompatible(lines, mode); !compatible {
 		return nil, fmt.Errorf("hash '%s' incompatible with mode %s or mode unsupported", incompatibleLine, mode)
 	}
 
 	return result, scanner.Err()
 }
 
-func isHashesFileCompatible(hashes *Hashes, mode Mode) (bool, string) {
-	for _, i := range hashes.InputRawLines {
+func isHashesFileCompatible(lines []string, mode Mode) (bool, string) {
+	for _, i := range lines {
 		if mode == Sha512 {
 			if !isLineCompatibleSha512(i) {
 				return false, i
