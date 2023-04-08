@@ -1,8 +1,18 @@
 package pvm
 
+import "fmt"
+
 /*
 *	Data packing styles for pvm_initsend()
  */
+
+const DEBUG = false
+
+func dbgln(frmt string, args ...any) {
+	if DEBUG {
+		fmt.Printf(fmt.Sprintf("[DEBUG] %s\n", frmt), args...)
+	}
+}
 
 type DataPackingStyle int64
 

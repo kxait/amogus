@@ -1,6 +1,7 @@
 package main
 
 import (
+	"amogus/child"
 	"amogus/parent"
 	"fmt"
 	"log"
@@ -22,6 +23,18 @@ func main() {
 	if len(os.Args) > 1 && os.Args[1] == "--test" {
 		fmt.Printf("running pvm test program\n")
 		TestPvm()
+		os.Exit(0)
+	}
+
+	if len(os.Args) > 1 && os.Args[1] == "--child" {
+		fmt.Printf("starting child\n")
+		err := child.RunChild()
+		if err != nil {
+			if err != nil {
+				fmt.Printf("ERROR: %s\n", err.Error())
+				os.Exit(1)
+			}
+		}
 		os.Exit(0)
 	}
 

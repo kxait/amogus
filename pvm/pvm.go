@@ -9,11 +9,14 @@ package pvm
 import "C"
 import (
 	"reflect"
+	"strings"
 	"unsafe"
 )
 
 func Mytid() (int, error) {
 	result := int(C.pvm_mytid())
+
+	dbgln("pvm_mytid() = %d", result)
 
 	if result < 0 {
 		return 0, PvmErrorFromInt(result)
@@ -24,6 +27,8 @@ func Mytid() (int, error) {
 
 func Parent() (int, error) {
 	result := int(C.pvm_parent())
+
+	dbgln("pvm_parent() = %d", result)
 
 	if result < 0 {
 		return 0, PvmErrorFromInt(result)
@@ -36,6 +41,8 @@ func CatchoutStdout() error {
 	if result := C.pvm_catchout_stdout(); result < 0 {
 		return PvmErrorFromCInt(result)
 	}
+
+	dbgln("pvm_catchout(stdout)")
 
 	return nil
 }
@@ -71,6 +78,8 @@ func Spawn(task string, args []string, flag SpawnOptions, where string, ntask in
 
 	tIds := cArrayToSlice(tIds_cint_ptr, ntask)
 
+	dbgln("pvm_spawn(%s, %s, %d, %s, %d) = %d, %s", task, strings.Join(args, ", "), flag, where, ntask, numt_cint, tIds)
+
 	if int(numt_cint) < ntask {
 		return &Spawn_result{
 			Numt: int(numt_cint),
@@ -92,6 +101,8 @@ func Perror(msg string) error {
 		return PvmErrorFromCInt(info)
 	}
 
+	dbgln("pvm_perror(%s)", msg)
+
 	return nil
 }
 
@@ -99,6 +110,8 @@ func Exit() error {
 	if info := C.pvm_exit(); info != 0 {
 		return PvmErrorFromCInt(info)
 	}
+
+	dbgln("pvm_exit()")
 
 	return nil
 }
@@ -110,7 +123,21 @@ func Initsend(encoding DataPackingStyle) (int, error) {
 		return 0, PvmErrorFromCInt(bufid)
 	}
 
+	dbgln("pvm_initsend(%d) = %d", encoding, bufid)
+
 	return int(bufid), nil
+}
+
+func Kill(tId int) error {
+	info := C.pvm_kill(C.int(tId))
+
+	if info < 0 {
+		return PvmErrorFromCInt(info)
+	}
+
+	dbgln("pvm_kill(%d) = %d", tId, info)
+
+	return nil
 }
 
 /* PVM_PACKF STATIC BINDINGS */
@@ -126,6 +153,8 @@ func PackfString(fmt string, arg string) (int, error) {
 	if info < 0 {
 		return 0, PvmErrorFromCInt(info)
 	}
+
+	dbgln("pvm_packf(%s, %s)", fmt, arg)
 
 	return int(info), nil
 }
@@ -145,6 +174,8 @@ func UnpackfString(fmt string, buflen int) (string, error) {
 		return "", PvmErrorFromCInt(info)
 	}
 
+	dbgln("pvm_unpackf(%s, %d) = %s", fmt, buflen, C.GoString(arg_cstr))
+
 	return C.GoString(arg_cstr), nil
 }
 
@@ -152,6 +183,8 @@ func Send(tid int, msgtag int) error {
 	if info := C.pvm_send(C.int(tid), C.int(msgtag)); info < 0 {
 		return PvmErrorFromCInt(info)
 	}
+
+	dbgln("pvm_send(%d, %d)", tid, msgtag)
 
 	return nil
 }
@@ -163,6 +196,8 @@ func Recv(tid int, msgtag int) (int, error) {
 		return 0, PvmErrorFromCInt(info)
 	}
 
+	dbgln("pvm_send(%d, %d) = %d", tid, msgtag, info)
+
 	return int(info), nil
 }
 
@@ -172,6 +207,8 @@ func Nrecv(tid int, msgtag int) (int, error) {
 	if info < 0 {
 		return 0, PvmErrorFromCInt(info)
 	}
+
+	dbgln("pvm_nrecv(%d, %d) = %d", tid, msgtag, info)
 
 	return int(info), nil
 }
