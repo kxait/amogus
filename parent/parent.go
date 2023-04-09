@@ -5,7 +5,8 @@ import (
 	"amogus/pvm"
 	"amogus/pvm_rpc"
 	"fmt"
-	"strconv"
+	"os"
+	"os/signal"
 	"sync"
 	"time"
 )
@@ -31,45 +32,51 @@ const amogus string = `
 ⠀⠀⠀⠀⠀⠀⠀⢿⣿⣦⣄⣀⣠⣴⣿⣿⠁⠀⠈⠻⣿⣿⣿⣿⡿⠏⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠈⠛⠻⠿⠿⠿⠿⠋⠁`
 
+type parentState struct {
+	lastOrigin string
+}
+
 func RunParent(hashesPath string, configPath string, output string) error {
+
+	state := parentState{}
 
 	fmt.Println(amogus)
 
 	fmt.Printf("hashes: %s config: %s output: %s\n", hashesPath, configPath, output)
 
-	_, err := config.GetConfig(configPath)
+	cfg, err := config.GetConfig(configPath)
 
 	if err != nil {
 		return err
 	}
 
-	_ = config.CreateOutputAppender(output)
+	oa, err := config.CreateOutputAppender(output)
+	if err != nil {
+		return err
+	}
 
 	srv := &pvm_rpc.RpcServer{Handlers: make(map[pvm_rpc.MessageType]pvm_rpc.RpcHandler)}
-	srv.Handlers["ping"] = func(m *pvm_rpc.Message) (*pvm_rpc.Message, error) {
-		return m.CreateResponse("pong"), nil
-	}
-	srv.Handlers["multiply"] = func(m *pvm_rpc.Message) (*pvm_rpc.Message, error) {
-		fmt.Printf("request from %d: %s\n", m.Id, m.Type)
-		i1, i2 := 0, 0
-		fmt.Sscanf(m.Content, "%d %d", &i1, &i2)
-
-		return m.CreateResponse(strconv.Itoa(i1 * i2)), nil
-	}
+	registerParentHandlers(srv, cfg, hashesPath, oa, &state)
 
 	fmt.Println("RPC server up and running")
 
 	pvm.CatchoutStdout()
-	res, err := pvm.Spawn("amogus", []string{"--child"}, pvm.TaskDefault, "", 1)
+	res, err := pvm.Spawn("amogus", []string{"--child"}, pvm.TaskDefault, "", int(cfg.Slaves))
 	if err != nil {
 		return err
 	}
-	defer pvm.Kill(res.TIds[0])
 
-	child := pvm_rpc.NewTarget(res.TIds[0])
+	defer (func() {
+		for _, c := range res.TIds {
+			pvm.Kill(c)
+		}
+	})()
+
+	//child := pvm_rpc.NewTarget(res.TIds[0])
 
 	var wg sync.WaitGroup
-	wg.Add(2)
+	//wg.Add(2)
+	wg.Add(1)
 
 	var loopErr error
 	go (func() {
@@ -80,21 +87,33 @@ func RunParent(hashesPath string, configPath string, output string) error {
 		wg.Done()
 	})()
 
-	var clientErr error
-	go (func() {
-		for clientErr == nil {
-			time.Sleep(10 * time.Millisecond)
-			fmt.Printf("calling ping...\n")
-			res := <-child.Call("ping", "sus")
-			clientErr = res.Err
-			fmt.Printf("ping response: %+v\n", res.Response)
+	go func() {
+		sigchan := make(chan os.Signal)
+		signal.Notify(sigchan, os.Interrupt)
+		<-sigchan
+
+		for _, c := range res.TIds {
+			pvm.Kill(c)
 		}
-		wg.Done()
-	})()
+
+		// do last actions and wait for all write operations to end
+
+		os.Exit(0)
+	}()
+
+	// var clientErr error
+	// go (func() {
+	// 	for clientErr == nil {
+	// 		time.Sleep(10 * time.Millisecond)
+
+	// 	}
+	// 	wg.Done()
+	// })()
 
 	wg.Wait()
 
-	fmt.Printf("server stopped: %s or %s\n", loopErr.Error(), clientErr.Error())
+	//fmt.Printf("server stopped: %s or %s\n", loopErr.Error(), clientErr.Error())
+	fmt.Printf("server stopped: %s\n", loopErr.Error())
 
 	// last := "aaaaaaaa"
 	// var count int64
