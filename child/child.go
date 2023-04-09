@@ -6,7 +6,6 @@ import (
 	"amogus/parent"
 	"amogus/pvm"
 	"amogus/pvm_rpc"
-	"amogus/tstree"
 	"bufio"
 	"crypto/sha512"
 	"encoding/json"
@@ -14,6 +13,7 @@ import (
 	"os"
 	"strconv"
 	"sync"
+	"time"
 )
 
 /*
@@ -70,7 +70,7 @@ func RunChild() error {
 	var clientErr error
 	go (func() {
 		for clientErr == nil {
-			//time.Sleep(1 * time.Millisecond)
+			time.Sleep(1 * time.Millisecond)
 			clientErr = work(&state, parent)
 		}
 		wg.Done()
@@ -162,18 +162,10 @@ func work(state *childState, parent *pvm_rpc.Target) error {
 	return nil
 }
 
-func findStringsInFile(filename string, sussy []hashPair) []hashPair {
+func findStringsInFile(filename string, sussy *map[string]string) []hashPair {
 	var result []hashPair
 	file, _ := os.Open(filename)
 	defer file.Close()
-
-	lut := tstree.BuildLookupTableFromLines([]string{})
-	m := make(map[string]string, 0)
-	for _, sus := range sussy {
-		//fmt.Printf("%+v\n", sus)
-		m[sus.hash] = sus.origin
-		lut.AppendLine(sus.hash)
-	}
 
 	counter := safeCounter{list: make([]hashPair, 0)}
 	var wg sync.WaitGroup
@@ -182,15 +174,14 @@ func findStringsInFile(filename string, sussy []hashPair) []hashPair {
 	for scanner.Scan() {
 		line := scanner.Text()
 		wg.Add(1)
-		go (func(l *tstree.LookupTable, ll string, c *safeCounter, ma *map[string]string) {
-			if l.Has(ll) {
-				//fmt.Printf("FOUND! hash %s origin %s", line, m[line])
+		go func(ll string, c *safeCounter, ma *map[string]string) {
+			if origin, ok := (*ma)[ll]; ok {
 				c.mut.Lock()
-				c.list = append(c.list, hashPair{hash: ll, origin: (*ma)[ll]})
+				c.list = append(c.list, hashPair{hash: ll, origin: origin})
 				c.mut.Unlock()
 			}
 			wg.Done()
-		})(lut, line, &counter, &m)
+		}(line, &counter, sussy)
 	}
 
 	wg.Wait()
@@ -208,7 +199,12 @@ type safeCounter struct {
 	list []hashPair
 }
 
-func generateHashes(cfg *config.AmogusConfig, last string, amount int) []hashPair {
+type safeCounterMap struct {
+	mut sync.Mutex
+	ma  *map[string]string
+}
+
+func generateHashes(cfg *config.AmogusConfig, last string, amount int) *map[string]string {
 	lastLast := last
 	var origins []string
 	for i := 0; i < amount; i++ {
@@ -216,19 +212,21 @@ func generateHashes(cfg *config.AmogusConfig, last string, amount int) []hashPai
 		origins = append(origins, lastLast)
 	}
 
-	c := safeCounter{list: make([]hashPair, 0)}
+	result := make(map[string]string)
+
+	c := safeCounterMap{ma: &result}
 
 	var wg sync.WaitGroup
 
 	for _, origin := range origins {
 		wg.Add(1)
-		go (func(origin string, c *safeCounter) {
+		go (func(origin string, c *safeCounterMap) {
 			if cfg.Mode != config.Sha512 {
 				panic("at the disco")
 			}
 			hash := hashSha512(origin)
 			c.mut.Lock()
-			c.list = append(c.list, *hash)
+			(*c.ma)[hash.hash] = origin
 			c.mut.Unlock()
 			wg.Done()
 		})(origin, &c)
@@ -236,7 +234,7 @@ func generateHashes(cfg *config.AmogusConfig, last string, amount int) []hashPai
 
 	wg.Wait()
 
-	return c.list
+	return c.ma
 }
 
 func hashSha512(origin string) *hashPair {
