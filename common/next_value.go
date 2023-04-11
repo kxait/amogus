@@ -1,4 +1,4 @@
-package parent
+package common
 
 import (
 	"amogus/config"
@@ -8,7 +8,7 @@ import (
 
 func GetNextValue(cfg *config.AmogusConfig, value string) string {
 	if value == "" {
-		return string(cfg.Characters[0])
+		return repeatString(string(cfg.Characters[0]), int(cfg.LengthStart))
 	}
 
 	return getNextValueInternal(cfg, value, 1)
@@ -16,7 +16,7 @@ func GetNextValue(cfg *config.AmogusConfig, value string) string {
 
 func GetNextValueOffset(cfg *config.AmogusConfig, value string, offset int64) string {
 	if value == "" {
-		return getNextValueInternal(cfg, string(cfg.Characters[0]), offset)
+		return getNextValueInternal(cfg, repeatString(string(cfg.Characters[0]), int(cfg.LengthStart)), offset)
 	}
 
 	return getNextValueInternal(cfg, value, offset)
@@ -56,5 +56,13 @@ func getNextValueInternal(cfg *config.AmogusConfig, value string, offset int64) 
 		result = fmt.Sprintf("%c%s", cfg.Characters[indices[i]-1], result)
 	}
 
+	return result
+}
+
+func repeatString(subject string, count int) string {
+	result := ""
+	for i := 0; i < count; i++ {
+		result = fmt.Sprintf("%s%s", result, subject)
+	}
 	return result
 }

@@ -89,7 +89,7 @@ func hashCracked(oa config.OutputAppender) pvm_rpc.RpcHandler {
 
 func getNextAssignment(cfg *config.AmogusConfig, s *parentState, hashesPath string) pvm_rpc.RpcHandler {
 	return func(m *pvm_rpc.Message) (*pvm_rpc.Message, error) {
-		next := GetNextValueOffset(cfg, s.lastOrigin, int64(cfg.ChunkSize))
+		next := common.GetNextValueOffset(cfg, s.lastOrigin, int64(cfg.ChunkSize))
 
 		res := m.CreateResponse(s.lastOrigin)
 

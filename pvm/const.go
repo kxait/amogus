@@ -2,10 +2,6 @@ package pvm
 
 import "fmt"
 
-/*
-*	Data packing styles for pvm_initsend()
- */
-
 const DEBUG = false
 
 func dbgln(frmt string, args ...any) {
@@ -13,6 +9,10 @@ func dbgln(frmt string, args ...any) {
 		fmt.Printf(fmt.Sprintf("[DEBUG] %s\n", frmt), args...)
 	}
 }
+
+/*
+*	Data packing styles for pvm_initsend()
+ */
 
 type DataPackingStyle int64
 

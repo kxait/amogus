@@ -1,59 +1,55 @@
 package config
 
 import (
-	"amogus/tstree"
-	"bufio"
-	"fmt"
+	"math"
 	"os"
-	"regexp"
 )
 
-type Hashes struct {
-	//InputRawLines []string
-	Lut *tstree.LookupTable
+const DefaultPartLength int64 = 32000
+
+type HashesInfo struct {
+	Parts      int64
+	PartLength int64
 }
 
-func ReadHashesFile(filename string, mode Mode) (*Hashes, error) {
+func GetHashesInfo(filename string) (*HashesInfo, error) {
+	st, err := os.Stat(filename)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &HashesInfo{
+		Parts:      int64(math.Ceil(float64(st.Size()) / float64(DefaultPartLength))),
+		PartLength: DefaultPartLength,
+	}, nil
+}
+
+func GetHashesPart(filename string, partNo int64) ([]byte, error) {
+	st, err := os.Stat(filename)
+	if err != nil {
+		return nil, err
+	}
+
 	file, err := os.Open(filename)
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
 
-	var lines []string
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
+	offset := DefaultPartLength * partNo
+	lengthToEnd := st.Size() - offset
+	var bufsize int
+	if lengthToEnd < DefaultPartLength {
+		bufsize = int(lengthToEnd)
+	} else {
+		bufsize = int(DefaultPartLength)
 	}
 
-	result := &Hashes{
-		Lut: tstree.BuildLookupTableFromLines(lines),
-	}
+	file.Seek(DefaultPartLength*partNo, 0)
 
-	if compatible, incompatibleLine := isHashesFileCompatible(lines, mode); !compatible {
-		return nil, fmt.Errorf("hash '%s' incompatible with mode %s or mode unsupported", incompatibleLine, mode)
-	}
+	buf := make([]byte, bufsize)
 
-	return result, scanner.Err()
-}
+	file.Read(buf)
 
-func isHashesFileCompatible(lines []string, mode Mode) (bool, string) {
-	for _, i := range lines {
-		if mode == Sha512 {
-			if !isLineCompatibleSha512(i) {
-				return false, i
-			}
-		} else {
-			// no other algos supported
-			return false, i
-		}
-	}
-
-	return true, ""
-}
-
-func isLineCompatibleSha512(line string) bool {
-	m, _ := regexp.MatchString("^\\w{128}$", line)
-
-	return m
+	return buf, nil
 }

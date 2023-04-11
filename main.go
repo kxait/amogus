@@ -4,10 +4,8 @@ import (
 	"amogus/child"
 	"amogus/parent"
 	"fmt"
-	"log"
-	"net/http"
-	_ "net/http/pprof"
 	"os"
+	"path/filepath"
 )
 
 const defaultConfigPath string = "amogus.yaml"
@@ -15,9 +13,8 @@ const defaultOutputPath string = "cracked"
 
 func main() {
 	if len(os.Args) > 1 && (os.Args[1] == "--help" || os.Args[1] == "-h") {
-		// TODO
-		fmt.Printf("help is on the way!")
-		os.Exit(1)
+		usage(false)
+		return
 	}
 
 	if len(os.Args) > 1 && os.Args[1] == "--test" {
@@ -46,8 +43,8 @@ func main() {
 	if len(os.Args) > 1 {
 		hashesPath = os.Args[1]
 	} else {
-		fmt.Println("path to input file was not supplied")
-		os.Exit(1)
+		usage(true)
+		return
 	}
 
 	// 2 args - hashes list is #1, config path is #2, output path is default
@@ -66,10 +63,6 @@ func main() {
 
 	fmt.Printf("input: %s, config: %s, output: %s\n", hashesPath, configPath, outputPath)
 
-	go func() {
-		log.Println(http.ListenAndServe("localhost:6060", nil))
-	}()
-
 	err := parent.RunParent(hashesPath, configPath, outputPath)
 
 	if err != nil {
@@ -77,4 +70,19 @@ func main() {
 		os.Exit(1)
 	}
 
+}
+
+func usage(err bool) {
+	progName := filepath.Base(os.Args[0])
+	fmt.Printf("usage: %s hashes_path [config_path] [output_path]\n", progName)
+	fmt.Println("github.com/kxait/amogus")
+
+	var exitCode int
+	if err {
+		exitCode = -1
+	} else {
+		exitCode = 0
+	}
+
+	os.Exit(exitCode)
 }

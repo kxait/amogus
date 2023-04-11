@@ -1,8 +1,8 @@
-package parent_test
+package common_test
 
 import (
+	"amogus/common"
 	"amogus/config"
-	"amogus/parent"
 	"testing"
 )
 
@@ -31,7 +31,7 @@ func TestNextValue(t *testing.T) {
 	}
 
 	for _, testCase := range testCasesSingle {
-		got := parent.GetNextValue(cfg, testCase.input)
+		got := common.GetNextValue(cfg, testCase.input)
 		if got != testCase.expect {
 			t.Errorf("got %s, wanted %s", got, testCase.expect)
 		}
@@ -56,7 +56,7 @@ func TestNextValueOffset(t *testing.T) {
 	}
 
 	for _, testCase := range testCasesOffset {
-		got := parent.GetNextValueOffset(cfg, testCase.input, testCase.offset)
+		got := common.GetNextValueOffset(cfg, testCase.input, testCase.offset)
 		if got != testCase.expect {
 			t.Errorf("got %s, wanted %s", got, testCase.expect)
 		}

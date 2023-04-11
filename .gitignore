@@ -2,3 +2,7 @@ bin/
 amogus.yaml
 hashes
 cracked
+hashes2
+.gitignore
+.vscode/launch.json
+json.json
