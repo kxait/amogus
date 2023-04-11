@@ -3,10 +3,12 @@ package parent
 import (
 	"amogus/common"
 	"amogus/config"
-	"amogus/pvm_rpc"
+
 	"encoding/json"
 	"fmt"
 	"strconv"
+
+	pvm_rpc "github.com/kxait/pvm-rpc"
 )
 
 func registerParentHandlers(rs *pvm_rpc.RpcServer, config *config.AmogusConfig, hashesPath string, oa config.OutputAppender, s *parentState) {

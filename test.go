@@ -1,10 +1,11 @@
 package main
 
 import (
-	"amogus/pvm"
 	"fmt"
 	"os"
 	"runtime"
+
+	"github.com/kxait/pvm-rpc/pvm"
 )
 
 func TestPvm() {

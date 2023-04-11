@@ -1,6 +1,8 @@
 package common
 
-import "amogus/pvm_rpc"
+import (
+	pvm_rpc "github.com/kxait/pvm-rpc"
+)
 
 const (
 	GetConfig         pvm_rpc.MessageType = "getConfig"

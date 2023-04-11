@@ -4,13 +4,15 @@ import (
 	"amogus/child/cracker"
 	"amogus/common"
 	"amogus/config"
-	"amogus/pvm"
-	"amogus/pvm_rpc"
+
 	"encoding/json"
 	"fmt"
 	"strconv"
 	"sync"
 	"time"
+
+	pvm_rpc "github.com/kxait/pvm-rpc"
+	"github.com/kxait/pvm-rpc/pvm"
 )
 
 var hashesPath string = "/tmp/hashes_to_crack"

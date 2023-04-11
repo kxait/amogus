@@ -2,13 +2,14 @@ package parent
 
 import (
 	"amogus/config"
-	"amogus/pvm"
-	"amogus/pvm_rpc"
 	"fmt"
 	"os"
 	"os/signal"
 	"sync"
 	"time"
+
+	pvm_rpc "github.com/kxait/pvm-rpc"
+	"github.com/kxait/pvm-rpc/pvm"
 )
 
 const amogus string = `
