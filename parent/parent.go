@@ -35,11 +35,12 @@ const amogus string = `
 
 type parentState struct {
 	lastOrigin string
+	ranOut     bool
 }
 
 func RunParent(hashesPath string, configPath string, output string) error {
 
-	state := parentState{}
+	state := parentState{lastOrigin: ""}
 
 	fmt.Println(amogus)
 
@@ -81,6 +82,11 @@ func RunParent(hashesPath string, configPath string, output string) error {
 		for loopErr == nil {
 			time.Sleep(10 * time.Millisecond)
 			loopErr = srv.StepEventLoop()
+
+			// if state.ranOut == true {
+			// 	loopErr = fmt.Errorf("finished!")
+			// 	break
+			// }
 		}
 		wg.Done()
 	})()

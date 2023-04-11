@@ -56,6 +56,10 @@ func getNextValueInternal(cfg *config.AmogusConfig, value string, offset int64) 
 		result = fmt.Sprintf("%c%s", cfg.Characters[indices[i]-1], result)
 	}
 
+	if len(result) > int(cfg.LengthEnd) {
+		return ""
+	}
+
 	return result
 }
 

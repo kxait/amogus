@@ -8,8 +8,7 @@ import (
 	"sync"
 )
 
-func FindStringsInFile(filename string, sussy *map[string]string) []HashPair {
-	var result []HashPair
+func FindStringsInFile(filename string, generatedHashes *map[string]string) []HashPair {
 	file, _ := os.Open(filename)
 	defer file.Close()
 
@@ -27,12 +26,12 @@ func FindStringsInFile(filename string, sussy *map[string]string) []HashPair {
 				c.mut.Unlock()
 			}
 			wg.Done()
-		}(line, &counter, sussy)
+		}(line, &counter, generatedHashes)
 	}
 
 	wg.Wait()
 
-	return result
+	return counter.list
 }
 
 func GenerateHashes(cfg *config.AmogusConfig, last string, amount int) *map[string]string {
