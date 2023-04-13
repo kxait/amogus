@@ -43,6 +43,9 @@ most parameters are self explanatory, `chunk_size` is the amount of hashes that 
 
 ### currently implemented modes
 - sha512
+- sha256
+- shadow
+  - sha512
 
 ### requirements
 - preferably a linux environment
