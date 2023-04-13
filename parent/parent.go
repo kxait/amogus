@@ -38,11 +38,14 @@ type parentState struct {
 	lastOrigin string
 	ranOut     bool
 	shadowMode common.ShadowMode
+
+	hashrate *hashRateSet
 }
 
 func RunParent(hashesPath string, configPath string, output string) error {
 
-	state := parentState{lastOrigin: ""}
+	state := parentState{lastOrigin: "", hashrate: &hashRateSet{}}
+	state.hashrate.init()
 
 	fmt.Println(amogus)
 
@@ -58,7 +61,9 @@ func RunParent(hashesPath string, configPath string, output string) error {
 		return err
 	}
 
-	state.shadowMode = *shadowMode
+	if shadowMode != nil {
+		state.shadowMode = *shadowMode
+	}
 
 	oa, err := config.CreateOutputAppender(output)
 	if err != nil {
@@ -110,6 +115,13 @@ func RunParent(hashesPath string, configPath string, output string) error {
 
 		os.Exit(0)
 	}()
+
+	go (func() {
+		for {
+			time.Sleep(10 * time.Second)
+			fmt.Printf("[HASHRATE] %d h/s\n", state.hashrate.getHashRate())
+		}
+	})()
 
 	wg.Wait()
 

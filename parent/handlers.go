@@ -7,7 +7,6 @@ import (
 
 	"encoding/json"
 	"fmt"
-	"strconv"
 
 	pvm_rpc "github.com/kxait/pvm-rpc"
 )
@@ -52,7 +51,8 @@ func getHashesInfo(hashesPath string, state *parentState) pvm_rpc.RpcHandler {
 
 func getHashesPart(hashesPath string) pvm_rpc.RpcHandler {
 	return func(m *pvm_rpc.Message) (*pvm_rpc.Message, error) {
-		partNo, err := strconv.Atoi(m.Content)
+		partArgs := common.GetHashesPartArgs{}
+		err := json.Unmarshal([]byte(m.Content), &partArgs)
 
 		if err != nil {
 			return nil, err
@@ -64,11 +64,11 @@ func getHashesPart(hashesPath string) pvm_rpc.RpcHandler {
 			return nil, err
 		}
 
-		if hashesInfo.Parts <= int64(partNo) || partNo < 0 {
-			return nil, fmt.Errorf("part number %d is out of range (max %d)", partNo, hashesInfo.Parts-1)
+		if hashesInfo.Parts <= int64(partArgs.Part) || partArgs.Part < 0 {
+			return nil, fmt.Errorf("part number %d is out of range (max %d)", partArgs.Part, hashesInfo.Parts-1)
 		}
 
-		part, err := config.GetHashesPart(hashesPath, int64(partNo))
+		part, err := config.GetHashesPart(hashesPath, int64(partArgs.Part))
 
 		if err != nil {
 			return nil, err
@@ -81,14 +81,18 @@ func getHashesPart(hashesPath string) pvm_rpc.RpcHandler {
 // format: 'hash origin'
 func hashCracked(oa config.OutputAppender) pvm_rpc.RpcHandler {
 	return func(m *pvm_rpc.Message) (*pvm_rpc.Message, error) {
-		hash, origin := "", ""
-		_, err := fmt.Sscanf(m.Content, "%s %s", &hash, &origin)
+		hashCrackedArgs := common.HashCrackedArgs{}
+		err := json.Unmarshal([]byte(m.Content), &hashCrackedArgs)
 
 		if err != nil {
 			return nil, err
 		}
 
-		fmt.Printf("CRACKED! hash '%s' origin '%s'\n", hash, origin)
+		if err != nil {
+			return nil, err
+		}
+
+		fmt.Printf("CRACKED! hash '%s' origin '%s'\n", hashCrackedArgs.Hash, hashCrackedArgs.Origin)
 		oa(m.Content)
 
 		return m.CreateResponse(""), nil
@@ -97,6 +101,19 @@ func hashCracked(oa config.OutputAppender) pvm_rpc.RpcHandler {
 
 func getNextAssignment(cfg *config.AmogusConfig, s *parentState, hashesPath string) pvm_rpc.RpcHandler {
 	return func(m *pvm_rpc.Message) (*pvm_rpc.Message, error) {
+		gnaArgs := common.GetNextAssignmentArgs{}
+		err := json.Unmarshal([]byte(m.Content), &gnaArgs)
+
+		if err != nil {
+			return nil, err
+		}
+
+		seconds := float64(gnaArgs.ChunkTimeMillis) / 1000.0
+		hashRatePerSecond := int64(float64(cfg.ChunkSize) / seconds)
+
+		s.hashrate.pushHashRate(hashRatePerSecond)
+		//fmt.Printf("cracked %d hashes in %g seconds\n", cfg.ChunkSize, seconds)
+
 		var next string
 		if s.lastOrigin == "" && !s.ranOut {
 			next = next_value.GetNextValue(cfg, s.lastOrigin)

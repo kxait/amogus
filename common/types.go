@@ -12,6 +12,19 @@ const (
 	GetNextAssignment pvm_rpc.MessageType = "getNextAssignment"
 )
 
+type GetNextAssignmentArgs struct {
+	ChunkTimeMillis int64
+}
+
+type HashCrackedArgs struct {
+	Hash   string
+	Origin string
+}
+
+type GetHashesPartArgs struct {
+	Part int
+}
+
 type ShadowMode int
 
 const (

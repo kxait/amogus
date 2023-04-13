@@ -10,7 +10,6 @@ import (
 
 	"encoding/json"
 	"fmt"
-	"strconv"
 	"sync"
 	"time"
 
@@ -93,7 +92,10 @@ func work(state *state.ChildState, parent *pvm_rpc.Target) error {
 		state.CurrentState = common.ConfigReceived
 		state.HashPartReceived = -1
 	} else if state.CurrentState == common.ConfigReceived {
-		res := <-parent.Call(common.GetHashesPart, strconv.FormatInt(state.HashPartReceived+1, 10))
+		res := <-parent.Call(common.GetHashesPart, serialize(common.GetHashesPartArgs{
+			Part: int(state.HashPartReceived + 1),
+		}))
+
 		if res.Err != nil {
 			return res.Err
 		}
@@ -128,11 +130,17 @@ func work(state *state.ChildState, parent *pvm_rpc.Target) error {
 
 		state.CurrentState = common.Idle
 	} else if state.CurrentState == common.Cracking {
+		state.LastChunkStart = time.Now()
+
 		hashes := cracker.GenerateHashes(state)
 		cracked := cracker.FindStringsInFile(hashesPath, hashes)
 
 		for _, c := range cracked {
-			res := <-parent.Call(common.HashCracked, fmt.Sprintf("%s %s", c.Hash, c.Origin))
+			res := <-parent.Call(common.HashCracked, serialize(common.HashCrackedArgs{
+				Hash:   c.Hash,
+				Origin: c.Origin,
+			}))
+
 			if res.Err != nil {
 				return res.Err
 			}
@@ -140,7 +148,11 @@ func work(state *state.ChildState, parent *pvm_rpc.Target) error {
 
 		state.CurrentState = common.Idle
 	} else if state.CurrentState == common.Idle {
-		res := <-parent.Call(common.GetNextAssignment, "")
+		diff := time.Now().Sub(state.LastChunkStart).Milliseconds()
+
+		res := <-parent.Call(common.GetNextAssignment, serialize(common.GetNextAssignmentArgs{
+			ChunkTimeMillis: diff,
+		}))
 		if res.Err != nil {
 			return res.Err
 		}
@@ -148,6 +160,17 @@ func work(state *state.ChildState, parent *pvm_rpc.Target) error {
 		state.CurrentAssignment = res.Response.Content
 		fmt.Printf("got assignment: %s chunk size %d\n", state.CurrentAssignment, state.Config.ChunkSize)
 		state.CurrentState = common.Cracking
+
 	}
 	return nil
+}
+
+func serialize(str interface{}) string {
+	serialized, err := json.Marshal(str)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return string(serialized)
 }
