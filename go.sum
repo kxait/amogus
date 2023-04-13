@@ -1,5 +1,17 @@
 github.com/kxait/pvm-rpc v0.0.0-20230411153425-70b3b5562e40 h1:wCyQgjlhPbqy/PLoUEAdSztVq/5Q28dxgDCuen5ZA5A=
 github.com/kxait/pvm-rpc v0.0.0-20230411153425-70b3b5562e40/go.mod h1:EPZJnjMLPxWpqpihotviFW0aCDaZh7Y6lKqhC4whXuw=
+github.com/nathanaelle/password v1.0.0 h1:1Etka3uuBvATlCb72f7P5vsgedus+C91Fgff1oMloq0=
+github.com/nathanaelle/password v1.0.0/go.mod h1:wt9xV3xwQmc3Qi0ofowmzR7N+kF1L4cguCuWjAfdj1Q=
+github.com/nathanaelle/password/v2 v2.0.1 h1:ItoCTdsuIWzilYmllQPa3DR3YoCXcpfxScWLqr8Ii2s=
+github.com/nathanaelle/password/v2 v2.0.1/go.mod h1:eaoT+ICQEPNtikBRIAatN8ThWwMhVG+r1jTw60BvPJk=
+golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
+golang.org/x/crypto v0.0.0-20200311171314-f7b00557c8c4/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
+golang.org/x/crypto v0.8.0 h1:pd9TJtTueMTVQXzk8E2XESSMQDj/U7OUu0PqJqPXQjQ=
+golang.org/x/crypto v0.8.0/go.mod h1:mRqEX+O9/h5TFCrQhkgjo2yKi0yYA+9ecGkdQoHrywE=
+golang.org/x/net v0.0.0-20190404232315-eb5bcb51f2a3/go.mod h1:t9HGtf8HONx5eT2rtn7q6eTqICYqUVnKs3thJo3Qplg=
+golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
+golang.org/x/sys v0.0.0-20190412213103-97732733099d/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=

@@ -3,6 +3,7 @@ package parent
 import (
 	"amogus/common"
 	"amogus/config"
+	"amogus/next_value"
 
 	"encoding/json"
 	"fmt"
@@ -11,9 +12,14 @@ import (
 	pvm_rpc "github.com/kxait/pvm-rpc"
 )
 
-func registerParentHandlers(rs *pvm_rpc.RpcServer, config *config.AmogusConfig, hashesPath string, oa config.OutputAppender, s *parentState) {
+func registerParentHandlers(
+	rs *pvm_rpc.RpcServer,
+	config *config.AmogusConfig,
+	hashesPath string,
+	oa config.OutputAppender,
+	s *parentState) {
 	rs.Handlers[common.GetConfig] = getConfig(config)
-	rs.Handlers[common.GetHashesInfo] = getHashesInfo(hashesPath)
+	rs.Handlers[common.GetHashesInfo] = getHashesInfo(hashesPath, s)
 	rs.Handlers[common.GetHashesPart] = getHashesPart(hashesPath)
 	rs.Handlers[common.HashCracked] = hashCracked(oa)
 	rs.Handlers[common.GetNextAssignment] = getNextAssignment(config, s, hashesPath)
@@ -30,9 +36,9 @@ func getConfig(config *config.AmogusConfig) pvm_rpc.RpcHandler {
 	}
 }
 
-func getHashesInfo(hashesPath string) pvm_rpc.RpcHandler {
+func getHashesInfo(hashesPath string, state *parentState) pvm_rpc.RpcHandler {
 	return func(m *pvm_rpc.Message) (*pvm_rpc.Message, error) {
-		hashesInfo, err := config.GetHashesInfo(hashesPath)
+		hashesInfo, err := config.GetHashesInfo(hashesPath, &state.shadowMode)
 
 		if err != nil {
 			return nil, err
@@ -52,7 +58,7 @@ func getHashesPart(hashesPath string) pvm_rpc.RpcHandler {
 			return nil, err
 		}
 
-		hashesInfo, err := config.GetHashesInfo(hashesPath)
+		hashesInfo, err := config.GetHashesInfo(hashesPath, nil)
 
 		if err != nil {
 			return nil, err
@@ -93,9 +99,9 @@ func getNextAssignment(cfg *config.AmogusConfig, s *parentState, hashesPath stri
 	return func(m *pvm_rpc.Message) (*pvm_rpc.Message, error) {
 		var next string
 		if s.lastOrigin == "" && !s.ranOut {
-			next = common.GetNextValue(cfg, s.lastOrigin)
+			next = next_value.GetNextValue(cfg, s.lastOrigin)
 		} else if s.lastOrigin != "" && !s.ranOut {
-			next = common.GetNextValueOffset(cfg, s.lastOrigin, int64(cfg.ChunkSize))
+			next = next_value.GetNextValueOffset(cfg, s.lastOrigin, int64(cfg.ChunkSize))
 		}
 
 		if next == "" {

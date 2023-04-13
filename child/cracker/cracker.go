@@ -1,18 +1,20 @@
 package cracker
 
 import (
+	"amogus/child/state"
 	"amogus/common"
 	"amogus/config"
+	"amogus/next_value"
 	"bufio"
 	"os"
 	"sync"
 )
 
-func FindStringsInFile(filename string, generatedHashes *map[string]string) []HashPair {
+func FindStringsInFile(filename string, generatedHashes *map[string]string) []common.HashPair {
 	file, _ := os.Open(filename)
 	defer file.Close()
 
-	counter := safeCounter{list: make([]HashPair, 0)}
+	counter := safeCounter{list: make([]common.HashPair, 0)}
 	var wg sync.WaitGroup
 
 	scanner := bufio.NewScanner(file)
@@ -22,7 +24,7 @@ func FindStringsInFile(filename string, generatedHashes *map[string]string) []Ha
 		go func(ll string, c *safeCounter, ma *map[string]string) {
 			if origin, ok := (*ma)[ll]; ok {
 				c.mut.Lock()
-				c.list = append(c.list, HashPair{Hash: ll, Origin: origin})
+				c.list = append(c.list, common.HashPair{Hash: ll, Origin: origin})
 				c.mut.Unlock()
 			}
 			wg.Done()
@@ -34,11 +36,11 @@ func FindStringsInFile(filename string, generatedHashes *map[string]string) []Ha
 	return counter.list
 }
 
-func GenerateHashes(cfg *config.AmogusConfig, last string, amount int) *map[string]string {
-	lastLast := last
+func GenerateHashes(s *state.ChildState) *map[string]string {
+	lastLast := s.CurrentAssignment
 	var origins []string
-	for i := 0; i < amount; i++ {
-		lastLast = common.GetNextValue(cfg, lastLast)
+	for i := 0; i < s.Config.ChunkSize; i++ {
+		lastLast = next_value.GetNextValue(&s.Config, lastLast)
 		origins = append(origins, lastLast)
 	}
 
@@ -51,10 +53,20 @@ func GenerateHashes(cfg *config.AmogusConfig, last string, amount int) *map[stri
 	for _, origin := range origins {
 		wg.Add(1)
 		go (func(origin string, c *safeCounterMap) {
-			if cfg.Mode != config.Sha512 {
+			var hash *common.HashPair
+			switch s.Config.Mode {
+			case config.Sha512:
+				hash = hashSha512(origin)
+				break
+			case config.Sha256:
+				hash = hashSha256(origin)
+				break
+			case config.Shadow:
+				hash = hashShadow(origin, s)
+				break
+			default:
 				panic("at the disco")
 			}
-			hash := hashSha512(origin)
 			c.mut.Lock()
 			(*c.ma)[hash.Hash] = origin
 			c.mut.Unlock()

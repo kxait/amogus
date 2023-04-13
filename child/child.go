@@ -2,8 +2,11 @@ package child
 
 import (
 	"amogus/child/cracker"
+	"amogus/child/cracker/shadow"
+	"amogus/child/state"
 	"amogus/common"
 	"amogus/config"
+	"os"
 
 	"encoding/json"
 	"fmt"
@@ -17,17 +20,9 @@ import (
 
 var hashesPath string = "/tmp/hashes_to_crack"
 
-type childState struct {
-	currentAssignment string
-	currentState      ChildState
-	config            config.AmogusConfig
-	hashesInfo        config.HashesInfo
-	hashPartReceived  int64
-}
-
 func RunChild() error {
-	state := childState{
-		currentState: Start,
+	state := state.ChildState{
+		CurrentState: common.Start,
 	}
 
 	parentId, err := pvm.Parent()
@@ -64,14 +59,15 @@ func RunChild() error {
 	return nil
 }
 
-func work(state *childState, parent *pvm_rpc.Target) error {
-	if state.currentState == Start {
+func work(state *state.ChildState, parent *pvm_rpc.Target) error {
+	if state.CurrentState == common.Start {
 		res := <-parent.Call(common.GetConfig, "")
 		if res.Err != nil {
 			return res.Err
 		}
 
-		err := json.Unmarshal([]byte(res.Response.Content), &state.config)
+		err := json.Unmarshal([]byte(res.Response.Content), &state.Config)
+
 		if err != nil {
 			return err
 		}
@@ -81,23 +77,23 @@ func work(state *childState, parent *pvm_rpc.Target) error {
 			return res.Err
 		}
 
-		err = json.Unmarshal([]byte(res.Response.Content), &state.hashesInfo)
+		err = json.Unmarshal([]byte(res.Response.Content), &state.HashesInfo)
 		if err != nil {
 			return err
 		}
 
-		fmt.Println(state.config)
-		fmt.Println(state.hashesInfo)
+		fmt.Println(state.Config)
+		fmt.Println(state.HashesInfo)
 
 		_, err = config.CreateOutputAppenderWithTruncate(hashesPath)
 		if err != nil {
 			return err
 		}
 
-		state.currentState = ConfigReceived
-		state.hashPartReceived = -1
-	} else if state.currentState == ConfigReceived {
-		res := <-parent.Call(common.GetHashesPart, strconv.FormatInt(state.hashPartReceived+1, 10))
+		state.CurrentState = common.ConfigReceived
+		state.HashPartReceived = -1
+	} else if state.CurrentState == common.ConfigReceived {
+		res := <-parent.Call(common.GetHashesPart, strconv.FormatInt(state.HashPartReceived+1, 10))
 		if res.Err != nil {
 			return res.Err
 		}
@@ -109,17 +105,30 @@ func work(state *childState, parent *pvm_rpc.Target) error {
 
 		oa(res.Response.Message.Content)
 
-		fmt.Printf("%d/%d: len %d\n", state.hashPartReceived+1, state.hashesInfo.Parts, len(res.Response.Message.Content))
+		fmt.Printf("%d/%d: len %d\n", state.HashPartReceived+1, state.HashesInfo.Parts, len(res.Response.Message.Content))
 
-		state.hashPartReceived++
-		if state.hashPartReceived >= state.hashesInfo.Parts-1 {
-			state.currentState = HashesReceived
+		state.HashPartReceived++
+		if state.HashPartReceived >= state.HashesInfo.Parts-1 {
+			state.CurrentState = common.HashesReceived
 			return nil
 		}
-	} else if state.currentState == HashesReceived {
-		state.currentState = Idle
-	} else if state.currentState == Cracking {
-		hashes := cracker.GenerateHashes(&state.config, state.currentAssignment, state.config.ChunkSize)
+	} else if state.CurrentState == common.HashesReceived {
+		if state.HashesInfo.ShadowMode != 0 {
+			if state.HashesInfo.ShadowMode == common.ShadowSha512 {
+				hashes, err := os.ReadFile(hashesPath)
+				if err != nil {
+					return err
+				}
+
+				state.ShadowCrypter = shadow.GetSaltySha512Crypter(string(hashes))
+			} else {
+				return fmt.Errorf("unsupported shadow mode %d", state.HashesInfo.ShadowMode)
+			}
+		}
+
+		state.CurrentState = common.Idle
+	} else if state.CurrentState == common.Cracking {
+		hashes := cracker.GenerateHashes(state)
 		cracked := cracker.FindStringsInFile(hashesPath, hashes)
 
 		for _, c := range cracked {
@@ -129,16 +138,16 @@ func work(state *childState, parent *pvm_rpc.Target) error {
 			}
 		}
 
-		state.currentState = Idle
-	} else if state.currentState == Idle {
+		state.CurrentState = common.Idle
+	} else if state.CurrentState == common.Idle {
 		res := <-parent.Call(common.GetNextAssignment, "")
 		if res.Err != nil {
 			return res.Err
 		}
 
-		state.currentAssignment = res.Response.Content
-		fmt.Printf("got assignment: %s chunk size %d\n", state.currentAssignment, state.config.ChunkSize)
-		state.currentState = Cracking
+		state.CurrentAssignment = res.Response.Content
+		fmt.Printf("got assignment: %s chunk size %d\n", state.CurrentAssignment, state.Config.ChunkSize)
+		state.CurrentState = common.Cracking
 	}
 	return nil
 }

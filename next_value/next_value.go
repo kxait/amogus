@@ -1,4 +1,4 @@
-package common
+package next_value
 
 import (
 	"amogus/config"

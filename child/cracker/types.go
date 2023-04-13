@@ -1,15 +1,13 @@
 package cracker
 
-import "sync"
-
-type HashPair struct {
-	Hash   string
-	Origin string
-}
+import (
+	"amogus/common"
+	"sync"
+)
 
 type safeCounter struct {
 	mut  sync.Mutex
-	list []HashPair
+	list []common.HashPair
 }
 
 type safeCounterMap struct {

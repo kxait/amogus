@@ -1,6 +1,7 @@
 package parent
 
 import (
+	"amogus/common"
 	"amogus/config"
 	"fmt"
 	"os"
@@ -36,6 +37,7 @@ const amogus string = `
 type parentState struct {
 	lastOrigin string
 	ranOut     bool
+	shadowMode common.ShadowMode
 }
 
 func RunParent(hashesPath string, configPath string, output string) error {
@@ -47,10 +49,16 @@ func RunParent(hashesPath string, configPath string, output string) error {
 	fmt.Printf("hashes: %s config: %s output: %s\n", hashesPath, configPath, output)
 
 	cfg, err := config.GetConfig(configPath)
-
 	if err != nil {
 		return err
 	}
+
+	err, shadowMode := config.ValidateHashes(hashesPath, cfg.Mode)
+	if err != nil {
+		return err
+	}
+
+	state.shadowMode = *shadowMode
 
 	oa, err := config.CreateOutputAppender(output)
 	if err != nil {
