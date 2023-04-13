@@ -65,6 +65,9 @@ func work(state *state.ChildState, parent *pvm_rpc.Target) error {
 			return res.Err
 		}
 
+		hostname, _ := os.Hostname()
+		fmt.Printf("%s\n", hostname)
+
 		err := json.Unmarshal([]byte(res.Response.Content), &state.Config)
 
 		if err != nil {

@@ -111,7 +111,7 @@ func getNextAssignment(cfg *config.AmogusConfig, s *parentState, hashesPath stri
 		seconds := float64(gnaArgs.ChunkTimeMillis) / 1000.0
 		hashRatePerSecond := int64(float64(cfg.ChunkSize) / seconds)
 
-		s.hashrate.pushHashRate(hashRatePerSecond)
+		s.hashrate.pushHashRate(m.CallerTaskId, hashRatePerSecond)
 		//fmt.Printf("cracked %d hashes in %g seconds\n", cfg.ChunkSize, seconds)
 
 		var next string

@@ -119,7 +119,7 @@ func RunParent(hashesPath string, configPath string, output string) error {
 	go (func() {
 		for {
 			time.Sleep(10 * time.Second)
-			fmt.Printf("[HASHRATE] %d h/s\n", state.hashrate.getHashRate())
+			fmt.Printf("[HASHRATE] %d h/s (%+v)\n", state.hashrate.getHashRate(), state.hashrate.hashRatesByTid)
 		}
 	})()
 
