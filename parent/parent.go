@@ -124,19 +124,24 @@ func RunParent(hashesPath string, configPath string, output string) error {
 	}()
 
 	go (func() {
-		oa, err := config.CreateOutputAppender("hashrate")
-		if err != nil {
-			panic(err)
+		var oa config.OutputAppender
+		if cfg.TestSuiteSampleSize > 0 {
+			oa, err = config.CreateOutputAppender("hashrate")
+			if err != nil {
+				panic(err)
+			}
 		}
 		i := 0
 		for {
 			time.Sleep(5 * time.Second)
 			hashrate := state.hashrate.getHashRate()
 			fmt.Printf("[HASHRATE] %d h/s (%+v)\n", state.hashrate.getHashRate(), state.hashrate.hashRatesByTid)
-			oa(fmt.Sprintf("%d %d %+v", i, hashrate, state.hashrate.hashRatesByTid))
 			i++
-			if cfg.TestSuiteSampleSize > 0 && i >= cfg.TestSuiteSampleSize {
-				die(res)
+			if cfg.TestSuiteSampleSize > 0 {
+				oa(fmt.Sprintf("%d %d %+v", i, hashrate, state.hashrate.hashRatesByTid))
+				if i >= cfg.TestSuiteSampleSize {
+					die(res)
+				}
 			}
 		}
 	})()

@@ -61,8 +61,6 @@ func main() {
 		outputPath = defaultOutputPath
 	}
 
-	fmt.Printf("input: %s, config: %s, output: %s\n", hashesPath, configPath, outputPath)
-
 	err := parent.RunParent(hashesPath, configPath, outputPath)
 
 	if err != nil {

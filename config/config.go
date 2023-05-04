@@ -68,12 +68,20 @@ func validateConf(conf *AmogusConfig) error {
 		return fmt.Errorf("unsupported cracking mode '%s'", conf.Mode)
 	}
 
-	if conf.LengthStart < 1 || conf.LengthStart > conf.LengthEnd {
+	if conf.LengthStart < 1 || conf.LengthStart > conf.LengthEnd || conf.LengthEnd == 0 {
 		return fmt.Errorf("unsupported password lenghts: start %d end %d", conf.LengthStart, conf.LengthEnd)
 	}
 
 	if conf.Slaves < 1 {
-		return fmt.Errorf("can't have %d (<1) slaves", conf.Slaves)
+		return fmt.Errorf("unsupported count of slaves %d (<1)", conf.Slaves)
+	}
+
+	if conf.Characters == "" {
+		return fmt.Errorf(("provide the characters that will be used"))
+	}
+
+	if conf.ChunkSize < 1 {
+		return fmt.Errorf("unsupported chunksize %d (<1)", conf.ChunkSize)
 	}
 
 	return nil

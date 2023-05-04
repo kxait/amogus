@@ -14,6 +14,7 @@ SLAVES=$((hosts))
 SLAVES=$((SLAVES)) ./make-config.sh > amogus.yaml
 echo "$((hosts)) hosts, $((SLAVES)) slaves total"
 ./run.sh
+
 mv hashrate hashrate-$((hosts))-$((SLAVES))
 
 SLAVES=$((hosts * 2)) 

@@ -12,4 +12,4 @@ characters: abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPRSTUVWXYZ012345678
 mode: sha512
 slaves: $SLAVES
 chunk_size: 50000
-test_suite_sample_size: 12
+test_suite_sample_size: 15
