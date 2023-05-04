@@ -117,9 +117,17 @@ func RunParent(hashesPath string, configPath string, output string) error {
 	}()
 
 	go (func() {
+		oa, err := config.CreateOutputAppender("hashrate")
+		if err != nil {
+			panic(err)
+		}
+		i := 0
 		for {
-			time.Sleep(10 * time.Second)
+			time.Sleep(5 * time.Second)
+			hashrate := state.hashrate.getHashRate()
 			fmt.Printf("[HASHRATE] %d h/s (%+v)\n", state.hashrate.getHashRate(), state.hashrate.hashRatesByTid)
+			oa(fmt.Sprintf("%d %d %+v", i, hashrate, state.hashrate.hashRatesByTid))
+			i++
 		}
 	})()
 
