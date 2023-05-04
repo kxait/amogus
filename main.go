@@ -27,10 +27,10 @@ func main() {
 		fmt.Printf("starting child\n")
 		err := child.RunChild()
 		if err != nil {
-			if err != nil {
-				fmt.Printf("ERROR: %s\n", err.Error())
-				os.Exit(1)
-			}
+			panic(err)
+			//fmt.Printf("ERROR: %s\n", err.Error())
+			//os.Exit(1)
+			//debug.PrintStack()
 		}
 		os.Exit(0)
 	}
@@ -66,8 +66,10 @@ func main() {
 	err := parent.RunParent(hashesPath, configPath, outputPath)
 
 	if err != nil {
-		fmt.Printf("ERROR: %s\n", err.Error())
-		os.Exit(1)
+		//fmt.Printf("ERROR: %s\n", err.Error())
+		//debug.PrintStack()
+		panic(err)
+		//os.Exit(1)
 	}
 
 }

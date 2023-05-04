@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"runtime/debug"
 	"sync"
 	"time"
 
@@ -78,6 +79,12 @@ func RunParent(hashesPath string, configPath string, output string) error {
 	pvm.CatchoutStdout()
 	res, err := pvm.Spawn("amogus", []string{"--child"}, pvm.TaskDefault, "", int(cfg.Slaves))
 	if err != nil {
+		if pvmErr, ok := err.(*pvm.PvmError); ok {
+			if(pvmErr.ErrorCode > 0) {
+				fmt.Printf("some tasks failed to spawn: %+v\n", res.TIds)
+			}
+		}
+		debug.PrintStack()
 		return err
 	}
 
@@ -101,6 +108,7 @@ func RunParent(hashesPath string, configPath string, output string) error {
 			// 	break
 			// }
 		}
+		debug.PrintStack()
 		wg.Done()
 	})()
 

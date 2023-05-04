@@ -28,7 +28,7 @@ type GetHashesPartArgs struct {
 type ShadowMode int
 
 const (
-	ShadowSha512 ShadowMode = iota + 1
+	ShadowSha512 ShadowMode = iota
 )
 
 type HashPair struct {
@@ -39,9 +39,9 @@ type HashPair struct {
 type ChildState int
 
 const (
-	Start          ChildState = iota + 1
-	ConfigReceived ChildState = iota + 2
-	HashesReceived ChildState = iota + 3
-	Idle           ChildState = iota + 4
-	Cracking       ChildState = iota + 5
+	Start ChildState = iota
+	ConfigReceived
+	HashesReceived
+	Idle
+	Cracking
 )
