@@ -1,5 +1,7 @@
 github.com/kxait/pvm-rpc v0.0.0-20230411153425-70b3b5562e40 h1:wCyQgjlhPbqy/PLoUEAdSztVq/5Q28dxgDCuen5ZA5A=
 github.com/kxait/pvm-rpc v0.0.0-20230411153425-70b3b5562e40/go.mod h1:EPZJnjMLPxWpqpihotviFW0aCDaZh7Y6lKqhC4whXuw=
+github.com/kxait/pvm-rpc v0.0.0-20230504123123-9e2033985bf0 h1:OH1dfkjwkIVnut3WPvlAX2T0NL6CTmCEmYhByDlqtvU=
+github.com/kxait/pvm-rpc v0.0.0-20230504123123-9e2033985bf0/go.mod h1:EPZJnjMLPxWpqpihotviFW0aCDaZh7Y6lKqhC4whXuw=
 github.com/nathanaelle/password v1.0.0 h1:1Etka3uuBvATlCb72f7P5vsgedus+C91Fgff1oMloq0=
 github.com/nathanaelle/password v1.0.0/go.mod h1:wt9xV3xwQmc3Qi0ofowmzR7N+kF1L4cguCuWjAfdj1Q=
 github.com/nathanaelle/password/v2 v2.0.1 h1:ItoCTdsuIWzilYmllQPa3DR3YoCXcpfxScWLqr8Ii2s=

@@ -80,7 +80,7 @@ func RunParent(hashesPath string, configPath string, output string) error {
 	res, err := pvm.Spawn("amogus", []string{"--child"}, pvm.TaskDefault, "", int(cfg.Slaves))
 	if err != nil {
 		if pvmErr, ok := err.(*pvm.PvmError); ok {
-			if(pvmErr.ErrorCode > 0) {
+			if pvmErr.ErrorCode > 0 {
 				fmt.Printf("some tasks failed to spawn: %+v\n", res.TIds)
 			}
 		}
@@ -97,11 +97,14 @@ func RunParent(hashesPath string, configPath string, output string) error {
 	var wg sync.WaitGroup
 	wg.Add(1)
 
+	var hadMessage bool = true
 	var loopErr error
 	go (func() {
 		for loopErr == nil {
-			time.Sleep(10 * time.Millisecond)
-			loopErr = srv.StepEventLoop()
+			if !hadMessage {
+				time.Sleep(10 * time.Millisecond)
+			}
+			hadMessage, loopErr = srv.StepEventLoop()
 
 			// if state.ranOut == true {
 			// 	loopErr = fmt.Errorf("finished!")
@@ -145,7 +148,7 @@ func RunParent(hashesPath string, configPath string, output string) error {
 	return nil
 }
 
-func die(spawnResult *pvm.Spawn_result) {
+func die(spawnResult *pvm.SpawnResult) {
 	for _, c := range spawnResult.TIds {
 		pvm.Kill(c)
 	}

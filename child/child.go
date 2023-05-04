@@ -45,7 +45,6 @@ func RunChild() error {
 	var clientErr error
 	go (func() {
 		for clientErr == nil {
-			time.Sleep(1 * time.Millisecond)
 			clientErr = work(&state, parent)
 		}
 		wg.Done()
