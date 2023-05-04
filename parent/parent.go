@@ -117,11 +117,7 @@ func RunParent(hashesPath string, configPath string, output string) error {
 		signal.Notify(sigchan, os.Interrupt)
 		<-sigchan
 
-		for _, c := range res.TIds {
-			pvm.Kill(c)
-		}
-
-		os.Exit(0)
+		die(res)
 	}()
 
 	go (func() {
@@ -136,6 +132,9 @@ func RunParent(hashesPath string, configPath string, output string) error {
 			fmt.Printf("[HASHRATE] %d h/s (%+v)\n", state.hashrate.getHashRate(), state.hashrate.hashRatesByTid)
 			oa(fmt.Sprintf("%d %d %+v", i, hashrate, state.hashrate.hashRatesByTid))
 			i++
+			if cfg.TestSuiteSampleSize > 0 && i >= cfg.TestSuiteSampleSize {
+				die(res)
+			}
 		}
 	})()
 
@@ -144,4 +143,12 @@ func RunParent(hashesPath string, configPath string, output string) error {
 	fmt.Printf("server stopped: %s\n", loopErr.Error())
 
 	return nil
+}
+
+func die(spawnResult *pvm.Spawn_result) {
+	for _, c := range spawnResult.TIds {
+		pvm.Kill(c)
+	}
+
+	os.Exit(0)
 }

@@ -19,12 +19,13 @@ const (
 )
 
 type AmogusConfig struct {
-	LengthStart int64  `yaml:"length_start"`
-	LengthEnd   int64  `yaml:"length_end"`
-	Characters  string `yaml:"characters"`
-	Mode        Mode   `yaml:"mode"`
-	Slaves      int64  `yaml:"slaves"`
-	ChunkSize   int    `yaml:"chunk_size"`
+	LengthStart         int64  `yaml:"length_start"`
+	LengthEnd           int64  `yaml:"length_end"`
+	Characters          string `yaml:"characters"`
+	Mode                Mode   `yaml:"mode"`
+	Slaves              int64  `yaml:"slaves"`
+	ChunkSize           int    `yaml:"chunk_size"`
+	TestSuiteSampleSize int    `yaml:"test_suite_sample_size"`
 }
 
 func (conf *AmogusConfig) Base() int {
