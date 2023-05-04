@@ -60,8 +60,10 @@ this project was made for testing the performance of parallel computing. there i
 - hosts (1 node per host)
 - 2*hosts (2 nodes per host)
 - 4*hosts (4 nodes per host)
+
 where hosts are the var passed to `scripts/run-test-suite.sh`, for example:
 - `HOSTS=10 ./scripts/run-test-suite.sh` (the script uses relative paths so it's important to run it from the project root)
+
 this will run the program 3 different times, collect 14 samples for each of the different modes and exit. the hashrate samples will be saved as `hashrate-X-Y` where X is count of hosts and Y is count of total slaves
 
 to change different parameters during the test, modify the config template in `scripts/make-config.sh`
