@@ -47,4 +47,5 @@ this will run the program 3 different times, collect 14 samples for each of the 
 
 
 to change different parameters during the test, modify the config template in `scripts/make-config.sh`
+
 for tasks required before running the program, add them to `scripts/run.sh` (e.g. copying the executable to different hosts)
