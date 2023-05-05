@@ -66,5 +66,6 @@ where hosts are the var passed to `scripts/run-test-suite.sh`, for example:
 
 this will run the program 3 different times, collect 14 samples for each of the different modes and exit. the hashrate samples will be saved as `hashrate-X-Y` where X is count of hosts and Y is count of total slaves
 
+
 to change different parameters during the test, modify the config template in `scripts/make-config.sh`
-for tasks required before running the program, add them to `scripts/run.sh` (i.e. copying the executable to different hosts)
+for tasks required before running the program, add them to `scripts/run.sh` (e.g. copying the executable to different hosts)
